@@ -1,0 +1,22 @@
+PODS:
+  - Charts (3.4.0):
+    - Charts/Core (= 3.4.0)
+  - Charts/Core (3.4.0)
+  - Euclid (0.1.9)
+
+DEPENDENCIES:
+  - Charts
+  - Euclid (~> 0.1)
+
+SPEC REPOS:
+  trunk:
+    - Charts
+    - Euclid
+
+SPEC CHECKSUMS:
+  Charts: 74c9f256eaf0460c0c416522d1cf8c634ea6b286
+  Euclid: 2eb8740c196b930814117c4bd4515abd4d8ffcc6
+
+PODFILE CHECKSUM: adf32df679a55cff51ac560156216af833065d6e
+
+COCOAPODS: 1.8.4

@@ -1,0 +1,6 @@
+framework module Pods_PhoneSensorManager {
+  umbrella header "Pods-PhoneSensorManager-umbrella.h"
+
+  export *
+  module * { export * }
+}

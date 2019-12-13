@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,6 +14,10 @@
 		469507FC23A14FBE0061F5E4 /* PhoneSensorManager.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 469507FA23A14FBE0061F5E4 /* PhoneSensorManager.xcdatamodeld */; };
 		469507FE23A14FBE0061F5E4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 469507FD23A14FBE0061F5E4 /* Assets.xcassets */; };
 		4695080123A14FBE0061F5E4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 469507FF23A14FBE0061F5E4 /* LaunchScreen.storyboard */; };
+		4695080D23A1B1890061F5E4 /* CMRotationMatrixExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4695080C23A1B1890061F5E4 /* CMRotationMatrixExt.swift */; };
+		4695082523A1B5170061F5E4 /* MeshObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4695082423A1B5170061F5E4 /* MeshObjects.swift */; };
+		469508C123A1ECD60061F5E4 /* SensorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469508C023A1ECD60061F5E4 /* SensorManager.swift */; };
+		F5AF7DF4B5995008AE11000A /* Pods_PhoneSensorManager.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 60590B8154A4B9B76349F236 /* Pods_PhoneSensorManager.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +30,12 @@
 		469507FD23A14FBE0061F5E4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4695080023A14FBE0061F5E4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4695080223A14FBE0061F5E4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4695080C23A1B1890061F5E4 /* CMRotationMatrixExt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CMRotationMatrixExt.swift; sourceTree = "<group>"; };
+		4695082423A1B5170061F5E4 /* MeshObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeshObjects.swift; sourceTree = "<group>"; };
+		469508C023A1ECD60061F5E4 /* SensorManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SensorManager.swift; path = SDK/SensorManager.swift; sourceTree = SOURCE_ROOT; };
+		57AF46FCE76DC2F72022A52F /* Pods-PhoneSensorManager.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PhoneSensorManager.debug.xcconfig"; path = "Target Support Files/Pods-PhoneSensorManager/Pods-PhoneSensorManager.debug.xcconfig"; sourceTree = "<group>"; };
+		60590B8154A4B9B76349F236 /* Pods_PhoneSensorManager.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PhoneSensorManager.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB81DABB2CBE087786FC09B6 /* Pods-PhoneSensorManager.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PhoneSensorManager.release.xcconfig"; path = "Target Support Files/Pods-PhoneSensorManager/Pods-PhoneSensorManager.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,17 +43,29 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F5AF7DF4B5995008AE11000A /* Pods_PhoneSensorManager.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		34AD6B3A63FA16198A1B131B /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				57AF46FCE76DC2F72022A52F /* Pods-PhoneSensorManager.debug.xcconfig */,
+				FB81DABB2CBE087786FC09B6 /* Pods-PhoneSensorManager.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		469507E523A14FBE0061F5E4 = {
 			isa = PBXGroup;
 			children = (
 				469507F023A14FBE0061F5E4 /* PhoneSensorManager */,
 				469507EF23A14FBE0061F5E4 /* Products */,
+				34AD6B3A63FA16198A1B131B /* Pods */,
+				944E39BDB12FA99EBE0CB93D /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,16 +80,27 @@
 		469507F023A14FBE0061F5E4 /* PhoneSensorManager */ = {
 			isa = PBXGroup;
 			children = (
+				469508C023A1ECD60061F5E4 /* SensorManager.swift */,
 				469507F123A14FBE0061F5E4 /* AppDelegate.swift */,
 				469507F323A14FBE0061F5E4 /* SceneDelegate.swift */,
 				469507F523A14FBE0061F5E4 /* ViewController.swift */,
+				4695080C23A1B1890061F5E4 /* CMRotationMatrixExt.swift */,
 				469507F723A14FBE0061F5E4 /* Main.storyboard */,
 				469507FD23A14FBE0061F5E4 /* Assets.xcassets */,
 				469507FF23A14FBE0061F5E4 /* LaunchScreen.storyboard */,
 				4695080223A14FBE0061F5E4 /* Info.plist */,
 				469507FA23A14FBE0061F5E4 /* PhoneSensorManager.xcdatamodeld */,
+				4695082423A1B5170061F5E4 /* MeshObjects.swift */,
 			);
 			path = PhoneSensorManager;
+			sourceTree = "<group>";
+		};
+		944E39BDB12FA99EBE0CB93D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				60590B8154A4B9B76349F236 /* Pods_PhoneSensorManager.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -77,9 +110,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4695080523A14FBE0061F5E4 /* Build configuration list for PBXNativeTarget "PhoneSensorManager" */;
 			buildPhases = (
+				ADEBC0840B6993BA79AD51C0 /* [CP] Check Pods Manifest.lock */,
 				469507EA23A14FBE0061F5E4 /* Sources */,
 				469507EB23A14FBE0061F5E4 /* Frameworks */,
 				469507EC23A14FBE0061F5E4 /* Resources */,
+				C3A87213C2808B699CE1B5CF /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -136,6 +171,48 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		ADEBC0840B6993BA79AD51C0 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-PhoneSensorManager-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C3A87213C2808B699CE1B5CF /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PhoneSensorManager/Pods-PhoneSensorManager-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-PhoneSensorManager/Pods-PhoneSensorManager-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-PhoneSensorManager/Pods-PhoneSensorManager-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		469507EA23A14FBE0061F5E4 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -143,7 +220,10 @@
 			files = (
 				469507F623A14FBE0061F5E4 /* ViewController.swift in Sources */,
 				469507F223A14FBE0061F5E4 /* AppDelegate.swift in Sources */,
+				469508C123A1ECD60061F5E4 /* SensorManager.swift in Sources */,
 				469507FC23A14FBE0061F5E4 /* PhoneSensorManager.xcdatamodeld in Sources */,
+				4695082523A1B5170061F5E4 /* MeshObjects.swift in Sources */,
+				4695080D23A1B1890061F5E4 /* CMRotationMatrixExt.swift in Sources */,
 				469507F423A14FBE0061F5E4 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -286,6 +366,7 @@
 		};
 		4695080623A14FBE0061F5E4 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 57AF46FCE76DC2F72022A52F /* Pods-PhoneSensorManager.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -304,6 +385,7 @@
 		};
 		4695080723A14FBE0061F5E4 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = FB81DABB2CBE087786FC09B6 /* Pods-PhoneSensorManager.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
