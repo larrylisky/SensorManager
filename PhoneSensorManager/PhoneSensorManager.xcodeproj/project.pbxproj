@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4614FB2F23A3D88D00BD2F8D /* IntAxisValueFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4614FB2B23A3D88D00BD2F8D /* IntAxisValueFormatter.swift */; };
+		4614FB3023A3D88D00BD2F8D /* DayAxisValueFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4614FB2C23A3D88D00BD2F8D /* DayAxisValueFormatter.swift */; };
+		4614FB3123A3D88D00BD2F8D /* DateValueFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4614FB2D23A3D88D00BD2F8D /* DateValueFormatter.swift */; };
+		4614FB3223A3D88D00BD2F8D /* LargeValueFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4614FB2E23A3D88D00BD2F8D /* LargeValueFormatter.swift */; };
 		469507F223A14FBE0061F5E4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469507F123A14FBE0061F5E4 /* AppDelegate.swift */; };
 		469507F423A14FBE0061F5E4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469507F323A14FBE0061F5E4 /* SceneDelegate.swift */; };
 		469507F623A14FBE0061F5E4 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469507F523A14FBE0061F5E4 /* ViewController.swift */; };
@@ -21,6 +25,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4614FB2B23A3D88D00BD2F8D /* IntAxisValueFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntAxisValueFormatter.swift; sourceTree = "<group>"; };
+		4614FB2C23A3D88D00BD2F8D /* DayAxisValueFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DayAxisValueFormatter.swift; sourceTree = "<group>"; };
+		4614FB2D23A3D88D00BD2F8D /* DateValueFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DateValueFormatter.swift; sourceTree = "<group>"; };
+		4614FB2E23A3D88D00BD2F8D /* LargeValueFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LargeValueFormatter.swift; sourceTree = "<group>"; };
 		469507EE23A14FBE0061F5E4 /* PhoneSensorManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhoneSensorManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		469507F123A14FBE0061F5E4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		469507F323A14FBE0061F5E4 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -59,10 +67,22 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		4614FB2A23A3D88D00BD2F8D /* Formatters */ = {
+			isa = PBXGroup;
+			children = (
+				4614FB2B23A3D88D00BD2F8D /* IntAxisValueFormatter.swift */,
+				4614FB2C23A3D88D00BD2F8D /* DayAxisValueFormatter.swift */,
+				4614FB2D23A3D88D00BD2F8D /* DateValueFormatter.swift */,
+				4614FB2E23A3D88D00BD2F8D /* LargeValueFormatter.swift */,
+			);
+			path = Formatters;
+			sourceTree = "<group>";
+		};
 		469507E523A14FBE0061F5E4 = {
 			isa = PBXGroup;
 			children = (
 				469507F023A14FBE0061F5E4 /* PhoneSensorManager */,
+				4614FB2A23A3D88D00BD2F8D /* Formatters */,
 				469507EF23A14FBE0061F5E4 /* Products */,
 				34AD6B3A63FA16198A1B131B /* Pods */,
 				944E39BDB12FA99EBE0CB93D /* Frameworks */,
@@ -221,8 +241,12 @@
 				469507F623A14FBE0061F5E4 /* ViewController.swift in Sources */,
 				469507F223A14FBE0061F5E4 /* AppDelegate.swift in Sources */,
 				469508C123A1ECD60061F5E4 /* SensorManager.swift in Sources */,
+				4614FB3123A3D88D00BD2F8D /* DateValueFormatter.swift in Sources */,
+				4614FB3223A3D88D00BD2F8D /* LargeValueFormatter.swift in Sources */,
+				4614FB2F23A3D88D00BD2F8D /* IntAxisValueFormatter.swift in Sources */,
 				469507FC23A14FBE0061F5E4 /* PhoneSensorManager.xcdatamodeld in Sources */,
 				4695082523A1B5170061F5E4 /* MeshObjects.swift in Sources */,
+				4614FB3023A3D88D00BD2F8D /* DayAxisValueFormatter.swift in Sources */,
 				4695080D23A1B1890061F5E4 /* CMRotationMatrixExt.swift in Sources */,
 				469507F423A14FBE0061F5E4 /* SceneDelegate.swift in Sources */,
 			);

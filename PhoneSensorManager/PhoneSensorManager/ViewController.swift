@@ -15,6 +15,7 @@ import Foundation
 
 
 class ViewController: UIViewController {
+//class ViewController: DemoBaseViewController {
 
     @IBOutlet weak var lineChartView: LineChartView!
     @IBOutlet weak var sceneView: SCNView!
@@ -35,7 +36,6 @@ class ViewController: UIViewController {
     let sensor = SensorManager()
 
     // UI params
-    var hideRefFrameView = false
     var defaultColor : UIColor!
     var graphIndex : Int = 0
     var pickerData = [
@@ -43,7 +43,8 @@ class ViewController: UIViewController {
         "Acceleration",
         "Speed"]
     
-    override func viewDidLoad() {
+    
+     override func viewDidLoad() {
         super.viewDidLoad()
         
         recordButton.setTitle("Record", for: .normal)
@@ -54,9 +55,10 @@ class ViewController: UIViewController {
         graphPickView.dataSource = self
         
         // Setup reference frame display
-        if !hideRefFrameView {
-            setupRefFrameView()
-        }
+        setupRefFrameView()
+        
+        // Setup chart display
+        setupLineChartView()
         
         // Setup periodic timer task
         _ = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(periodic), userInfo: nil, repeats: true)
@@ -79,6 +81,120 @@ class ViewController: UIViewController {
         }
     }
     
+    @objc func periodic() {
+        if !sceneView.isHidden {
+            updateScene()
+        }
+        else {
+            updateChartData()
+        }
+    }
+    
+    func updateChartData() {
+        self.setDataCount(100, range: 30)
+    }
+    
+    func setDataCount(_ count: Int, range: UInt32) {
+        
+        // Create the data collection [ChartDataEntry]
+        let values = stride(from: 0.0, to: 100.0, by: 1.0).map { (x) -> ChartDataEntry in
+            let y = arc4random_uniform(range)
+            return ChartDataEntry(x: x, y: Double(y))
+        }
+        
+        // Setup the data set object
+        let set1 = LineChartDataSet(entries: values, label: "DataSet 1")
+        set1.axisDependency = .left
+        set1.setColor(UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1))
+        set1.lineWidth = 1.5
+        set1.drawCirclesEnabled = false
+        set1.drawValuesEnabled = false
+        set1.fillAlpha = 0.26
+        set1.fillColor = UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)
+        set1.highlightColor = UIColor(red: 244/255, green: 117/255, blue: 117/255, alpha: 1)
+        set1.drawCircleHoleEnabled = true
+    
+        // Setup the LineChartData
+        let data = LineChartData(dataSet: set1)
+        data.setValueTextColor(.white)
+        data.setValueFont(.systemFont(ofSize: 9, weight: .light))
+        
+        // Give the data to lineChartView
+        lineChartView.data = data
+    }
+
+}
+
+
+// ViewController LineChartView support functions
+extension ViewController {
+    
+    func setupLineChartView() {
+        // General settings
+        lineChartView.delegate = self
+        lineChartView.chartDescription?.enabled = false
+        lineChartView.dragEnabled = true
+        lineChartView.setScaleEnabled(true)
+        lineChartView.pinchZoomEnabled = false
+        lineChartView.highlightPerDragEnabled = true
+        lineChartView.backgroundColor = .white
+        lineChartView.legend.enabled = false
+               
+        let xAxis = lineChartView.xAxis
+        xAxis.labelPosition = .topInside
+        xAxis.labelFont = .systemFont(ofSize: 12, weight: .light)
+        xAxis.labelTextColor = UIColor.black
+        xAxis.drawAxisLineEnabled = false
+        xAxis.drawGridLinesEnabled = false
+        xAxis.centerAxisLabelsEnabled = true
+        xAxis.granularity = 1 // milliseconds
+        xAxis.valueFormatter = IntAxisValueFormatter()
+
+        // Setup Y axis
+        let leftAxis = lineChartView.leftAxis
+        leftAxis.labelPosition = .insideChart
+        leftAxis.labelFont = .systemFont(ofSize: 12, weight: .light)
+        leftAxis.drawGridLinesEnabled = true
+        leftAxis.granularityEnabled = true
+        leftAxis.axisMinimum = -100
+        leftAxis.axisMaximum = 100
+        leftAxis.yOffset = 0
+        leftAxis.labelTextColor = UIColor.red
+
+        lineChartView.rightAxis.enabled = false
+        lineChartView.legend.form = .line
+    }
+}
+
+// ChartViewDelegate
+extension ViewController : ChartViewDelegate {
+    @objc func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
+        print("Data at X(\(entry.x)) = \(entry.y)")
+    }
+       
+    // Called when a user stops panning between values on the chart
+    @objc func chartViewDidEndPanning(_ chartView: ChartViewBase) {
+    }
+       
+    // Called when nothing has been selected or an "un-select" has been made.
+    @objc func chartValueNothingSelected(_ chartView: ChartViewBase) {
+    }
+       
+    // Callbacks when the chart is scaled / zoomed via pinch zoom gesture.
+    @objc func chartScaled(_ chartView: ChartViewBase, scaleX: CGFloat, scaleY: CGFloat) {
+    }
+       
+    // Callbacks when the chart is moved / translated via drag gesture.
+    @objc func chartTranslated(_ chartView: ChartViewBase, dX: CGFloat, dY: CGFloat) {
+    }
+
+    // Callbacks when Animator stops animating
+    @objc func chartView(_ chartView: ChartViewBase, animatorDidStop animator: Animator) {
+    }
+}
+
+// ViewController Scene support functions
+extension ViewController {
     func setupRefFrameView() {
         // Setup scene and camera
         cameraNode.camera = SCNCamera()
@@ -125,7 +241,6 @@ class ViewController: UIViewController {
         sceneView.backgroundColor = .white
     }
     
-    
     func drawRefFrame(r: CMRotationMatrix) {
         if graphIndex == 0 || graphIndex == 2 {
             let arg = 1 + r.m11 + r.m22 + r.m33
@@ -138,14 +253,6 @@ class ViewController: UIViewController {
             }
         }
     }
-    
-    
-    @objc func periodic() {
-        if !sceneView.isHidden {
-            updateScene()
-        }
-    }
-
     
     func updateScene() {
         let course = sensor.data.course
@@ -173,8 +280,7 @@ class ViewController: UIViewController {
         let mesh = rod.merge(tip.translated(by: Vector(0.0, length/2.0, 0.0) ))
         return mesh
     }
-    
-    
+
     func refFrame(size: Double, alpha: Double)-> Mesh {
         let axisX = arrow(length: size, color: UIColor(red: 1, green: 0, blue: 0, alpha: CGFloat(alpha))).rotZ(deg: 90)
         let axisY = arrow(length: size, color: UIColor(red: 0, green: 1, blue: 0, alpha: CGFloat(alpha)))
@@ -182,6 +288,8 @@ class ViewController: UIViewController {
         return axisX.merge(axisY.merge(axisZ))
     }
 }
+
+
 
 // UIPickerViewDelegate, UIPickerViewDataSource extension
 extension ViewController : UIPickerViewDelegate, UIPickerViewDataSource {
@@ -204,5 +312,15 @@ extension ViewController : UIPickerViewDelegate, UIPickerViewDataSource {
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         graphIndex = row
         sceneView.isHidden = (graphIndex != 0)
+        switch graphIndex {
+        case 0:
+            title = "Reference Frames"
+        case 1:
+            title = "Accelerations"
+        case 2:
+            title = "Speed"
+        default:
+            break
+        }
     }
 }
