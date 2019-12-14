@@ -241,27 +241,36 @@ extension ViewController {
         sceneView.backgroundColor = .white
     }
     
-    func drawRefFrame(r: CMRotationMatrix) {
-        if graphIndex == 0 || graphIndex == 2 {
-            let arg = 1 + r.m11 + r.m22 + r.m33
-            if arg > 0.0000001 {
-                let qw = sqrt(arg)/2
-                let qx = (r.m32 - r.m23) / (4*qw)
-                let qy = (r.m13 - r.m31) / (4*qw)
-                let qz = (r.m21 - r.m12) / (4*qw)
-                earthRefFrameNode.orientation = SCNQuaternion(qx, qy, qz, qw)
-            }
+    func drawEarthRefFrame(r: CMRotationMatrix) {
+        let arg = 1 + r.m11 + r.m22 + r.m33
+        if arg > 0.0000001 {
+            let qw = sqrt(arg)/2
+            let qx = (r.m32 - r.m23) / (4*qw)
+            let qy = (r.m13 - r.m31) / (4*qw)
+            let qz = (r.m21 - r.m12) / (4*qw)
+            earthRefFrameNode.orientation = SCNQuaternion(qx, qy, qz, qw)
+        }
+    }
+    
+    func drawCarRefFrame(r: CMRotationMatrix) {
+        let arg = 1 + r.m11 + r.m22 + r.m33
+        if arg > 0.0000001 {
+            let qw = sqrt(arg)/2
+            let qx = (r.m32 - r.m23) / (4*qw)
+            let qy = (r.m13 - r.m31) / (4*qw)
+            let qz = (r.m21 - r.m12) / (4*qw)
+            carRefFrameNode.orientation = SCNQuaternion(qx, qy, qz, qw)
         }
     }
     
     func updateScene() {
+        let speed = sensor.data.speed
         let course = sensor.data.course
         var RotationCP : CMRotationMatrix
         let RotationGP = sensor.rotationMatrix
         
         SCNTransaction.begin()
-        drawRefFrame(r: RotationGP)
-        if course >= 0  {
+        if course > 0 && speed > 2.2452 {
             let theta = -course / 180.0 * Double.pi
             let c = cos(theta)
             let s = sin(theta)
@@ -269,8 +278,12 @@ extension ViewController {
                                               m21: s, m22: c, m23: 0,
                                               m31: 0, m32: 0, m33: 1)
             RotationCP = RotationGP * RotationGC
-            drawRefFrame(r: RotationCP)
         }
+        else {
+            RotationCP = CMRotationMatrix().identity()
+        }
+        drawCarRefFrame(r: RotationCP)
+        drawEarthRefFrame(r: RotationGP)
         SCNTransaction.commit()
     }
     
