@@ -5,7 +5,7 @@
 //  Created by Larry Li on 12/11/19.
 //  Copyright © 2019 e-motion.ai. All rights reserved.
 //
-
+import Euclid
 import CoreMotion
 
 extension CMRotationMatrix {
@@ -17,7 +17,14 @@ extension CMRotationMatrix {
                                 m31: 0.0, m32: 0.0, m33: 1.0)
     }
     
-    // Premultiple by matrix 'm'
+    static func *(left: CMRotationMatrix, right: Vector) -> Vector {
+        let x = left.m11 * right.x + left.m12 * right.y + left.m13 * right.z
+        let y = left.m21 * right.x + left.m22 * right.y + left.m23 * right.z
+        let z = left.m31 * right.x + left.m32 * right.z + left.m33 * right.z
+        return Vector(x, y, z)
+    }
+    
+    // Multiple two CMRotationMatrix
     static func *(left: CMRotationMatrix, right:CMRotationMatrix) -> CMRotationMatrix {
         return CMRotationMatrix(
             m11: left.m11*right.m11 + left.m12*right.m21 + left.m13*right.m31,

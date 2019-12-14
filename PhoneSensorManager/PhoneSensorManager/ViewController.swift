@@ -37,7 +37,8 @@ class ViewController: UIViewController {
     var earthRefFrame : Mesh!
     var carRefFrame : Mesh!
     let sensor = SensorManager()
-
+    var carAccelVector : Vector!
+    
     // UI params
     var defaultColor : UIColor!
     var graphIndex : Int = 0
@@ -50,6 +51,7 @@ class ViewController: UIViewController {
      override func viewDidLoad() {
         super.viewDidLoad()
         
+        carAccelVector = Vector(0,0,0)
         fifo = Fifo<(Double, Double, Double)>(dataSize, invalid: (0,0,0))
         
         recordButton.setTitle("Record", for: .normal)
@@ -234,44 +236,51 @@ extension ViewController {
         scene.rootNode.addChildNode(cameraNode)
         cameraNode.position = SCNVector3(x: 0, y: 0, z: 3.0)
         
-        // Create ref frames
-        phoneRefFrame = refFrame(size: 2.0, alpha: 0.2)
-        earthRefFrame = refFrame(size: 2.0, alpha: 0.6)
-        carRefFrame = refFrame(size: 2.0, alpha: 1.0)
-
-        // Add phone ref frame
-        geometry = SCNGeometry(phoneRefFrame) {
-            let material = SCNMaterial()
-            material.diffuse.contents = $0 as? UIColor
-            return material
-        }
-        phoneRefFrameNode = SCNNode(geometry: geometry)
-        scene.rootNode.addChildNode(phoneRefFrameNode)
-
-        // Add earth ref frame
-        geometry = SCNGeometry(earthRefFrame) {
-            let material = SCNMaterial()
-            material.diffuse.contents = $0 as? UIColor
-            return material
-        }
-        earthRefFrameNode = SCNNode(geometry: geometry)
-        scene.rootNode.addChildNode(earthRefFrameNode)
-
-        // Add car ref frame
-        geometry = SCNGeometry(carRefFrame) {
-            let material = SCNMaterial()
-            material.diffuse.contents = $0 as? UIColor
-            return material
-        }
-        carRefFrameNode = SCNNode(geometry: geometry)
-        scene.rootNode.addChildNode(carRefFrameNode)
-        
         // configure the SCNView
-        sceneView.scene = scene
         sceneView.autoenablesDefaultLighting = true
         sceneView.allowsCameraControl = false
         sceneView.showsStatistics = false
         sceneView.backgroundColor = .white
+        
+        // Create phone ref frame
+        phoneRefFrame = refFrame(size: 2.0, alpha: 0.2)
+        earthRefFrame = refFrame(size: 2.0, alpha: 0.6)
+        carRefFrame = refFrame(x: 1.0, y:1.0, z:1.0, alpha: 1.0)
+        
+        
+        // Add meshes to scene
+        phoneRefFrameNode = addToScene(phoneRefFrame)
+        earthRefFrameNode = addToScene(earthRefFrame)
+        carRefFrameNode = addToScene(carRefFrame)
+        
+        // attach scene to view
+        sceneView.scene = scene
+    }
+    
+    // Update car reference frame
+    func updateCarRefFrames(x: Double, y: Double, z: Double) {
+        carRefFrameNode.removeFromParentNode()
+        carRefFrame = refFrame(x: x, y: y, z: z, alpha: 1.0)
+        carRefFrameNode = addToScene(carRefFrame)
+    }
+    
+    // Make node from mesh
+    func makeNode(_ mesh: Mesh) -> SCNNode {
+        geometry = SCNGeometry(mesh) {
+            let material = SCNMaterial()
+            material.diffuse.contents = $0 as? UIColor
+            return material
+        }
+        let node = SCNNode(geometry: geometry)
+        return node
+    }
+    
+    
+    // Add a mesh to scene; returns the mesh's node
+    func addToScene(_ mesh: Mesh) -> SCNNode {
+        let node = makeNode(mesh)
+        scene.rootNode.addChildNode(node)
+        return node
     }
     
     func drawEarthRefFrame(r: CMRotationMatrix) {
@@ -315,6 +324,10 @@ extension ViewController {
         else {
             RotationCP = CMRotationMatrix().identity()
         }
+        
+        let phoneAccelVector = Vector(sensor.data.accelX, sensor.data.accelY, sensor.data.accelZ)
+        carAccelVector = RotationCP * phoneAccelVector
+        updateCarRefFrames(x: carAccelVector.x+1, y: carAccelVector.y+1, z: carAccelVector.z+1)
         drawCarRefFrame(r: RotationCP)
         drawEarthRefFrame(r: RotationGP)
         SCNTransaction.commit()
@@ -331,6 +344,28 @@ extension ViewController {
         let axisX = arrow(length: size, color: UIColor(red: 1, green: 0, blue: 0, alpha: CGFloat(alpha))).rotZ(deg: 90)
         let axisY = arrow(length: size, color: UIColor(red: 0, green: 1, blue: 0, alpha: CGFloat(alpha)))
         let axisZ = arrow(length: size, color: UIColor(red: 0, green: 0, blue: 1, alpha: CGFloat(alpha))).rotX(deg: -90)
+        return axisX.merge(axisY.merge(axisZ))
+    }
+    
+    func refFrame(x: Double, y: Double, z: Double, alpha: Double) -> Mesh {
+        var axisX : Mesh
+        var axisY : Mesh
+        var axisZ : Mesh
+        
+        axisX = arrow(length: x, color: UIColor(red: 1, green: 0, blue: 0, alpha: CGFloat(alpha))).rotZ(deg: 90).translated(by: Vector(x/2, 0, 0))
+        if x < 0 {
+            axisX = axisX.rotZ(deg: 180.0)
+        }
+        
+        axisY = arrow(length: y, color: UIColor(red: 0, green: 1, blue: 0, alpha: CGFloat(alpha))).translated(by: Vector(0, y/2, 0))
+        if y < 0 {
+            axisY = axisY.rotX(deg: 180.0)
+        }
+        
+        axisZ = arrow(length: z, color: UIColor(red: 0, green: 0, blue: 1, alpha: CGFloat(alpha))).rotX(deg: -90).translated(by: Vector(0, 0, z/2))
+        if z < 0 {
+            axisZ = axisZ.rotY(deg: 180.0)
+        }
         return axisX.merge(axisY.merge(axisZ))
     }
 }
