@@ -15,7 +15,6 @@ import Foundation
 
 
 class ViewController: UIViewController {
-//class ViewController: DemoBaseViewController {
 
     @IBOutlet weak var lineChartView: LineChartView!
     @IBOutlet weak var sceneView: SCNView!
@@ -23,6 +22,10 @@ class ViewController: UIViewController {
     @IBOutlet weak var exportFileName: UITextField!
     @IBOutlet weak var recordButton: UIButton!
     
+    // Line chart related params
+    let dataSize : Int = 100
+    var fifo : Fifo<(Double, Double, Double)>!
+            
     // Reference frames display params
     var scene = SCNScene()
     var cameraNode = SCNNode()
@@ -46,6 +49,8 @@ class ViewController: UIViewController {
     
      override func viewDidLoad() {
         super.viewDidLoad()
+        
+        fifo = Fifo<(Double, Double, Double)>(dataSize, invalid: (0,0,0))
         
         recordButton.setTitle("Record", for: .normal)
         defaultColor = recordButton.titleColor(for: .normal)
@@ -82,6 +87,7 @@ class ViewController: UIViewController {
     }
     
     @objc func periodic() {
+        fifo.push((sensor.data.accelX, sensor.data.accelY, sensor.data.accelZ))
         if !sceneView.isHidden {
             updateScene()
         }
@@ -91,31 +97,58 @@ class ViewController: UIViewController {
     }
     
     func updateChartData() {
-        self.setDataCount(100, range: 30)
-    }
-    
-    func setDataCount(_ count: Int, range: UInt32) {
-        
+            
         // Create the data collection [ChartDataEntry]
-        let values = stride(from: 0.0, to: 100.0, by: 1.0).map { (x) -> ChartDataEntry in
-            let y = arc4random_uniform(range)
-            return ChartDataEntry(x: x, y: Double(y))
+        let buf = fifo.get()
+        var xData : [ChartDataEntry] = []
+        var yData: [ChartDataEntry] = []
+        var zData : [ChartDataEntry] = []
+        for i in 0..<buf.count {
+            let x = Double(i)
+            let yx = buf[i].0
+            let yy = buf[i].1
+            let yz = buf[i].2
+            xData.append(ChartDataEntry(x: x, y: Double(yx)))
+            yData.append(ChartDataEntry(x: x, y: Double(yy)))
+            zData.append(ChartDataEntry(x: x, y: Double(yz)))
         }
         
         // Setup the data set object
-        let set1 = LineChartDataSet(entries: values, label: "DataSet 1")
-        set1.axisDependency = .left
-        set1.setColor(UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1))
-        set1.lineWidth = 1.5
-        set1.drawCirclesEnabled = false
-        set1.drawValuesEnabled = false
-        set1.fillAlpha = 0.26
-        set1.fillColor = UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)
-        set1.highlightColor = UIColor(red: 244/255, green: 117/255, blue: 117/255, alpha: 1)
-        set1.drawCircleHoleEnabled = true
+        let xSet = LineChartDataSet(entries: xData, label: "X")
+        xSet.axisDependency = .left
+        xSet.setColor(UIColor.red)
+        xSet.lineWidth = 1.5
+        xSet.drawCirclesEnabled = false
+        xSet.drawValuesEnabled = false
+        xSet.fillAlpha = 0.26
+        xSet.fillColor = UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)
+        xSet.highlightColor = UIColor(red: 244/255, green: 117/255, blue: 117/255, alpha: 1)
+        xSet.drawCircleHoleEnabled = false
     
+        let ySet = LineChartDataSet(entries: yData, label: "Y")
+        ySet.axisDependency = .left
+        ySet.setColor(UIColor.green)
+        ySet.lineWidth = 1.5
+        ySet.drawCirclesEnabled = false
+        ySet.drawValuesEnabled = false
+        ySet.fillAlpha = 0.26
+        ySet.fillColor = UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)
+        ySet.highlightColor = UIColor(red: 244/255, green: 117/255, blue: 117/255, alpha: 1)
+        ySet.drawCircleHoleEnabled = false
+        
+        let zSet = LineChartDataSet(entries: zData, label: "Z")
+        zSet.axisDependency = .left
+        zSet.setColor(UIColor.blue)
+        zSet.lineWidth = 1.5
+        zSet.drawCirclesEnabled = false
+        zSet.drawValuesEnabled = false
+        zSet.fillAlpha = 0.26
+        zSet.fillColor = UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)
+        zSet.highlightColor = UIColor(red: 244/255, green: 117/255, blue: 117/255, alpha: 1)
+        zSet.drawCircleHoleEnabled = false
+        
         // Setup the LineChartData
-        let data = LineChartData(dataSet: set1)
+        let data = LineChartData(dataSets: [xSet, ySet, zSet])
         data.setValueTextColor(.white)
         data.setValueFont(.systemFont(ofSize: 9, weight: .light))
         
@@ -156,8 +189,8 @@ extension ViewController {
         leftAxis.labelFont = .systemFont(ofSize: 12, weight: .light)
         leftAxis.drawGridLinesEnabled = true
         leftAxis.granularityEnabled = true
-        leftAxis.axisMinimum = -100
-        leftAxis.axisMaximum = 100
+        leftAxis.axisMinimum = -10
+        leftAxis.axisMaximum = 10
         leftAxis.yOffset = 0
         leftAxis.labelTextColor = UIColor.red
 
