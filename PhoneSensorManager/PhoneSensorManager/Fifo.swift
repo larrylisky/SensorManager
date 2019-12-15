@@ -20,6 +20,7 @@ class Fifo<T> {
     var count : Int
     var inv : T
     
+    //===================================================
     init(_ size: Int, invalid: T) {
         data = []
         head = 0
@@ -29,6 +30,15 @@ class Fifo<T> {
         inv = invalid
     }
     
+    //===================================================
+    func clear() {
+        data.removeAll()
+        head = 0
+        tail = 0
+        count = 0
+    }
+    
+    //===================================================
     func copy(_ from: Fifo<T>) {
         if !from.isEmpty() {
             for i in 0..<from.count {
@@ -42,6 +52,7 @@ class Fifo<T> {
         }
     }
     
+    //===================================================
     func push(_ value: T) {
         if data.count < max {
             data.append(value)
@@ -58,6 +69,7 @@ class Fifo<T> {
         }
     }
     
+    //===================================================
     func pop() -> T {
         var retVal : T
         
@@ -77,10 +89,12 @@ class Fifo<T> {
         }
     }
     
+    //===================================================
     func isEmpty() -> Bool {
         return count == 0
     }
     
+    //===================================================
     func get() -> [T] {
         var out : [T] = []
         let cp = Fifo<T>(max, invalid: inv)
@@ -91,10 +105,12 @@ class Fifo<T> {
         return out
     }
     
+    //===================================================
     func dump() {
         print("h:\(head) t:\(tail) \(data)")
     }
     
+    //===================================================
     static func test() {
         let fifo = Fifo<Double>(5, invalid: 0)
         for i in 0..<7 {

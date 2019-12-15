@@ -24,7 +24,7 @@ class ViewController: UIViewController {
     
     // Line chart related params
     let dataSize : Int = 100
-    var fifo : Fifo<(Double, Double, Double)>!
+    var fifo : Fifo<(Double, Double, Double, Double)>!
             
     // Reference frames display params
     var scene = SCNScene()
@@ -58,7 +58,7 @@ class ViewController: UIViewController {
         
         carAccelVector = Vector(0,0,0)
         phoneAccelVector = Vector(0,0,0)
-        fifo = Fifo<(Double, Double, Double)>(dataSize, invalid: (0,0,0))
+        fifo = Fifo<(Double, Double, Double, Double)>(dataSize, invalid: (0,0,0,0))
         
         recordButton.setTitle("Record", for: .normal)
         defaultColor = recordButton.titleColor(for: .normal)
@@ -71,7 +71,7 @@ class ViewController: UIViewController {
         setupRefFrameView()
         
         // Setup chart display
-        setupLineChartView()
+        setupLineChartView(-1, 1)
         
         // Setup periodic timer task
         _ = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(periodic), userInfo: nil, repeats: true)
@@ -80,6 +80,7 @@ class ViewController: UIViewController {
     
     //==========================================================================
     @IBAction func onClearPressed(_ sender: Any) {
+        fifo.clear()
     }
 
 
@@ -103,12 +104,13 @@ class ViewController: UIViewController {
     //==========================================================================
     // Periodic function
     @objc func periodic() {
+        let mph = Double(1/0.44704)
         
         updateTransforms()
         phoneAccelVector = Vector(sensor.data.accelX, sensor.data.accelY, sensor.data.accelZ)
        // carAccelVector = RotationPC * phoneAccelVector
         carAccelVector = phoneAccelVector * RotationPC
-        fifo.push((carAccelVector.x, carAccelVector.y, carAccelVector.z))
+        fifo.push((carAccelVector.x, carAccelVector.y, carAccelVector.z, sensor.data.speed*mph))
 
         if !sceneView.isHidden {
             updateScene()
@@ -128,57 +130,79 @@ class ViewController: UIViewController {
         var xData : [ChartDataEntry] = []
         var yData: [ChartDataEntry] = []
         var zData : [ChartDataEntry] = []
+        var spData : [ChartDataEntry] = []
         for i in 0..<buf.count {
             let x = Double(i)
             let yx = buf[i].0
             let yy = buf[i].1
             let yz = buf[i].2
+            let sp = buf[i].3
             xData.append(ChartDataEntry(x: x, y: Double(yx)))
             yData.append(ChartDataEntry(x: x, y: Double(yy)))
             zData.append(ChartDataEntry(x: x, y: Double(yz)))
+            spData.append(ChartDataEntry(x:x, y: Double(sp)))
         }
         
-        // Setup the data set object
-        let xSet = LineChartDataSet(entries: xData, label: "X")
-        xSet.axisDependency = .left
-        xSet.setColor(UIColor.red)
-        xSet.lineWidth = 1.5
-        xSet.drawCirclesEnabled = false
-        xSet.drawValuesEnabled = false
-        xSet.fillAlpha = 0.26
-        xSet.fillColor = UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)
-        xSet.highlightColor = UIColor(red: 244/255, green: 117/255, blue: 117/255, alpha: 1)
-        xSet.drawCircleHoleEnabled = false
-    
-        let ySet = LineChartDataSet(entries: yData, label: "Y")
-        ySet.axisDependency = .left
-        ySet.setColor(UIColor.green)
-        ySet.lineWidth = 1.5
-        ySet.drawCirclesEnabled = false
-        ySet.drawValuesEnabled = false
-        ySet.fillAlpha = 0.26
-        ySet.fillColor = UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)
-        ySet.highlightColor = UIColor(red: 244/255, green: 117/255, blue: 117/255, alpha: 1)
-        ySet.drawCircleHoleEnabled = false
+        if graphIndex == 1 {
+            // Setup the data set object
+            let xSet = LineChartDataSet(entries: xData, label: "X")
+            xSet.axisDependency = .left
+            xSet.setColor(UIColor.red)
+            xSet.lineWidth = 1.5
+            xSet.drawCirclesEnabled = false
+            xSet.drawValuesEnabled = false
+            xSet.fillAlpha = 0.26
+            xSet.fillColor = UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)
+            xSet.highlightColor = UIColor(red: 244/255, green: 117/255, blue: 117/255, alpha: 1)
+            xSet.drawCircleHoleEnabled = false
         
-        let zSet = LineChartDataSet(entries: zData, label: "Z")
-        zSet.axisDependency = .left
-        zSet.setColor(UIColor.blue)
-        zSet.lineWidth = 1.5
-        zSet.drawCirclesEnabled = false
-        zSet.drawValuesEnabled = false
-        zSet.fillAlpha = 0.26
-        zSet.fillColor = UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)
-        zSet.highlightColor = UIColor(red: 244/255, green: 117/255, blue: 117/255, alpha: 1)
-        zSet.drawCircleHoleEnabled = false
-        
-        // Setup the LineChartData
-        let data = LineChartData(dataSets: [xSet, ySet, zSet])
-        data.setValueTextColor(.white)
-        data.setValueFont(.systemFont(ofSize: 9, weight: .light))
-        
-        // Give the data to lineChartView
-        lineChartView.data = data
+            let ySet = LineChartDataSet(entries: yData, label: "Y")
+            ySet.axisDependency = .left
+            ySet.setColor(UIColor.green)
+            ySet.lineWidth = 1.5
+            ySet.drawCirclesEnabled = false
+            ySet.drawValuesEnabled = false
+            ySet.fillAlpha = 0.26
+            ySet.fillColor = UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)
+            ySet.highlightColor = UIColor(red: 244/255, green: 117/255, blue: 117/255, alpha: 1)
+            ySet.drawCircleHoleEnabled = false
+            
+            let zSet = LineChartDataSet(entries: zData, label: "Z")
+            zSet.axisDependency = .left
+            zSet.setColor(UIColor.blue)
+            zSet.lineWidth = 1.5
+            zSet.drawCirclesEnabled = false
+            zSet.drawValuesEnabled = false
+            zSet.fillAlpha = 0.26
+            zSet.fillColor = UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)
+            zSet.highlightColor = UIColor(red: 244/255, green: 117/255, blue: 117/255, alpha: 1)
+            zSet.drawCircleHoleEnabled = false
+            
+            // Setup the LineChartData
+            let data = LineChartData(dataSets: [xSet, ySet, zSet])
+            data.setValueTextColor(.white)
+            data.setValueFont(.systemFont(ofSize: 9, weight: .light))
+            lineChartView.data = data
+        }
+        else if graphIndex == 2 {  // speed
+            // Setup the data set object
+            let spSet = LineChartDataSet(entries: spData, label: "SPEED")
+            spSet.axisDependency = .left
+            spSet.setColor(UIColor.red)
+            spSet.lineWidth = 1.5
+            spSet.drawCirclesEnabled = false
+            spSet.drawValuesEnabled = false
+            spSet.fillAlpha = 0.26
+            spSet.fillColor = UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)
+            spSet.highlightColor = UIColor(red: 244/255, green: 117/255, blue: 117/255, alpha: 1)
+            spSet.drawCircleHoleEnabled = false
+            
+            // Setup the LineChartData
+            let data = LineChartData(dataSet: spSet)
+            data.setValueTextColor(.white)
+            data.setValueFont(.systemFont(ofSize: 9, weight: .light))
+            lineChartView.data = data
+        }
     }
 
 }
@@ -189,7 +213,7 @@ class ViewController: UIViewController {
 extension ViewController {
     
     //==========================================================================
-    func setupLineChartView() {
+    func setupLineChartView(_ min: Double, _ max: Double) {
         // General settings
         lineChartView.delegate = self
         lineChartView.chartDescription?.enabled = false
@@ -216,8 +240,8 @@ extension ViewController {
         leftAxis.labelFont = .systemFont(ofSize: 12, weight: .light)
         leftAxis.drawGridLinesEnabled = true
         leftAxis.granularityEnabled = true
-        leftAxis.axisMinimum = -1
-        leftAxis.axisMaximum = 1
+        leftAxis.axisMinimum = min
+        leftAxis.axisMaximum = max
         leftAxis.yOffset = 0
         leftAxis.labelTextColor = UIColor.red
 
@@ -449,8 +473,10 @@ extension ViewController : UIPickerViewDelegate, UIPickerViewDataSource {
         case 0:
             title = "Reference Frames"
         case 1:
+            setupLineChartView(-1, 1)
             title = "Accelerations"
         case 2:
+            setupLineChartView(0, 100)  // 0-100 mph
             title = "Speed"
         default:
             break
