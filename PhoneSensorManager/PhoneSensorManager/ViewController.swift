@@ -13,7 +13,7 @@ import Euclid
 import CoreMotion
 import Foundation
 
-
+//==========================================================================
 class ViewController: UIViewController {
 
     @IBOutlet weak var lineChartView: LineChartView!
@@ -29,7 +29,6 @@ class ViewController: UIViewController {
     // Reference frames display params
     var scene = SCNScene()
     var cameraNode = SCNNode()
-    var geometry : SCNGeometry!
     var phoneRefFrameNode : SCNNode!
     var earthRefFrameNode : SCNNode!
     var carRefFrameNode : SCNNode!
@@ -38,7 +37,13 @@ class ViewController: UIViewController {
     var carRefFrame : Mesh!
     let sensor = SensorManager()
     var carAccelVector : Vector!
+    var phoneAccelVector : Vector!
     
+    // Transformation matrices
+    var RotationPG : CMRotationMatrix!
+    var RotationGC : CMRotationMatrix!
+    var RotationPC : CMRotationMatrix!
+            
     // UI params
     var defaultColor : UIColor!
     var graphIndex : Int = 0
@@ -47,11 +52,12 @@ class ViewController: UIViewController {
         "Acceleration",
         "Speed"]
     
-    
-     override func viewDidLoad() {
+    //==========================================================================
+    override func viewDidLoad() {
         super.viewDidLoad()
         
         carAccelVector = Vector(0,0,0)
+        phoneAccelVector = Vector(0,0,0)
         fifo = Fifo<(Double, Double, Double)>(dataSize, invalid: (0,0,0))
         
         recordButton.setTitle("Record", for: .normal)
@@ -71,12 +77,18 @@ class ViewController: UIViewController {
         _ = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(periodic), userInfo: nil, repeats: true)
     }
     
+    
+    //==========================================================================
     @IBAction func onClearPressed(_ sender: Any) {
     }
-    
+
+
+    //==========================================================================
     @IBAction func onExportPressed(_ sender: Any) {
     }
+
     
+    //==========================================================================
     @IBAction func onRecordToggled(_ sender: Any) {
         if recordButton.titleLabel?.text == "Record" {
             recordButton.setTitleColor(UIColor.red, for: .normal)
@@ -88,8 +100,16 @@ class ViewController: UIViewController {
         }
     }
     
+    //==========================================================================
+    // Periodic function
     @objc func periodic() {
-        fifo.push((sensor.data.accelX, sensor.data.accelY, sensor.data.accelZ))
+        
+        updateTransforms()
+        phoneAccelVector = Vector(sensor.data.accelX, sensor.data.accelY, sensor.data.accelZ)
+       // carAccelVector = RotationPC * phoneAccelVector
+        carAccelVector = phoneAccelVector * RotationPC
+        fifo.push((carAccelVector.x, carAccelVector.y, carAccelVector.z))
+
         if !sceneView.isHidden {
             updateScene()
         }
@@ -97,7 +117,10 @@ class ViewController: UIViewController {
             updateChartData()
         }
     }
-    
+
+
+    //==========================================================================
+    // Update Chart data
     func updateChartData() {
             
         // Create the data collection [ChartDataEntry]
@@ -161,9 +184,11 @@ class ViewController: UIViewController {
 }
 
 
+//==========================================================================
 // ViewController LineChartView support functions
 extension ViewController {
     
+    //==========================================================================
     func setupLineChartView() {
         // General settings
         lineChartView.delegate = self
@@ -191,8 +216,8 @@ extension ViewController {
         leftAxis.labelFont = .systemFont(ofSize: 12, weight: .light)
         leftAxis.drawGridLinesEnabled = true
         leftAxis.granularityEnabled = true
-        leftAxis.axisMinimum = -10
-        leftAxis.axisMaximum = 10
+        leftAxis.axisMinimum = -1
+        leftAxis.axisMaximum = 1
         leftAxis.yOffset = 0
         leftAxis.labelTextColor = UIColor.red
 
@@ -201,35 +226,47 @@ extension ViewController {
     }
 }
 
+//==========================================================================
 // ChartViewDelegate
 extension ViewController : ChartViewDelegate {
+    
+    //==========================================================================
     @objc func chartValueSelected(_ chartView: ChartViewBase, entry: ChartDataEntry, highlight: Highlight) {
         print("Data at X(\(entry.x)) = \(entry.y)")
     }
        
+    //==========================================================================
     // Called when a user stops panning between values on the chart
     @objc func chartViewDidEndPanning(_ chartView: ChartViewBase) {
     }
        
+    //==========================================================================
     // Called when nothing has been selected or an "un-select" has been made.
     @objc func chartValueNothingSelected(_ chartView: ChartViewBase) {
     }
        
+    //==========================================================================
     // Callbacks when the chart is scaled / zoomed via pinch zoom gesture.
     @objc func chartScaled(_ chartView: ChartViewBase, scaleX: CGFloat, scaleY: CGFloat) {
     }
        
+    //==========================================================================
     // Callbacks when the chart is moved / translated via drag gesture.
     @objc func chartTranslated(_ chartView: ChartViewBase, dX: CGFloat, dY: CGFloat) {
     }
 
+    //==========================================================================
     // Callbacks when Animator stops animating
     @objc func chartView(_ chartView: ChartViewBase, animatorDidStop animator: Animator) {
     }
 }
 
+
+//==========================================================================
 // ViewController Scene support functions
 extension ViewController {
+    
+    //==========================================================================
     func setupRefFrameView() {
         // Setup scene and camera
         cameraNode.camera = SCNCamera()
@@ -243,9 +280,9 @@ extension ViewController {
         sceneView.backgroundColor = .white
         
         // Create phone ref frame
-        phoneRefFrame = refFrame(size: 2.0, alpha: 0.2)
-        earthRefFrame = refFrame(size: 2.0, alpha: 0.6)
-        carRefFrame = refFrame(x: 1.0, y:1.0, z:1.0, alpha: 1.0)
+        phoneRefFrame = refFrame(x: 1.0, y:1.0, z:1.0, alpha: 0.2)
+        earthRefFrame = refFrame(x: 1.0, y:1.0, z:1.0, alpha: 0.6)
+        carRefFrame = refFrame(x:1.0, y:1.0, z:1.0, alpha: 1.0)
         
         
         // Add meshes to scene
@@ -257,16 +294,19 @@ extension ViewController {
         sceneView.scene = scene
     }
     
+    //==========================================================================
     // Update car reference frame
-    func updateCarRefFrames(x: Double, y: Double, z: Double) {
-        carRefFrameNode.removeFromParentNode()
+    func updateCarRefFrame(x: Double, y: Double, z: Double) {
         carRefFrame = refFrame(x: x, y: y, z: z, alpha: 1.0)
-        carRefFrameNode = addToScene(carRefFrame)
+        let newNode = makeNode(carRefFrame)
+        scene.rootNode.replaceChildNode(carRefFrameNode, with: newNode)
+        carRefFrameNode = newNode
     }
     
+    //==========================================================================
     // Make node from mesh
     func makeNode(_ mesh: Mesh) -> SCNNode {
-        geometry = SCNGeometry(mesh) {
+        let geometry = SCNGeometry(mesh) {
             let material = SCNMaterial()
             material.diffuse.contents = $0 as? UIColor
             return material
@@ -275,7 +315,7 @@ extension ViewController {
         return node
     }
     
-    
+    //==========================================================================
     // Add a mesh to scene; returns the mesh's node
     func addToScene(_ mesh: Mesh) -> SCNNode {
         let node = makeNode(mesh)
@@ -283,6 +323,7 @@ extension ViewController {
         return node
     }
     
+    //==========================================================================
     func drawEarthRefFrame(r: CMRotationMatrix) {
         let arg = 1 + r.m11 + r.m22 + r.m33
         if arg > 0.0000001 {
@@ -293,7 +334,8 @@ extension ViewController {
             earthRefFrameNode.orientation = SCNQuaternion(qx, qy, qz, qw)
         }
     }
-    
+
+    //==========================================================================
     func drawCarRefFrame(r: CMRotationMatrix) {
         let arg = 1 + r.m11 + r.m22 + r.m33
         if arg > 0.0000001 {
@@ -305,90 +347,100 @@ extension ViewController {
         }
     }
     
-    func updateScene() {
+    //==========================================================================
+    func updateTransforms() {
         let speed = sensor.data.speed
         let course = sensor.data.course
-        var RotationCP : CMRotationMatrix
-        let RotationGP = sensor.rotationMatrix
+        //let course = 90.0
+        //let speed = 3.0
         
-        SCNTransaction.begin()
-        if course > 0 && speed > 2.2452 {
+        RotationPG = sensor.rotationMatrix
+        
+        if course >= 0 && speed > 2.2452 {
             let theta = -course / 180.0 * Double.pi
             let c = cos(theta)
             let s = sin(theta)
-            let RotationGC = CMRotationMatrix(m11: c, m12:-s, m13: 0,
-                                              m21: s, m22: c, m23: 0,
-                                              m31: 0, m32: 0, m33: 1)
-            RotationCP = RotationGP * RotationGC
+            RotationGC = CMRotationMatrix(m11: c, m12:-s, m13: 0,
+                                          m21: s, m22: c, m23: 0,
+                                          m31: 0, m32: 0, m33: 1)
+            RotationPC = RotationPG * RotationGC
         }
         else {
-            RotationCP = CMRotationMatrix().identity()
+            RotationPC = CMRotationMatrix().identity()
         }
+    }
+    
+    //==========================================================================
+    func updateScene() {
         
-        let phoneAccelVector = Vector(sensor.data.accelX, sensor.data.accelY, sensor.data.accelZ)
-        carAccelVector = RotationCP * phoneAccelVector
-        updateCarRefFrames(x: carAccelVector.x+1, y: carAccelVector.y+1, z: carAccelVector.z+1)
-        drawCarRefFrame(r: RotationCP)
-        drawEarthRefFrame(r: RotationGP)
+        SCNTransaction.begin()
+       // updateCarRefFrame(x: 2, y: 2, z: 2)    // TODO: buggy
+        drawCarRefFrame(r: RotationPC)
+        drawEarthRefFrame(r: RotationPG)
         SCNTransaction.commit()
     }
     
+    //==========================================================================
     func arrow(length: Double, color: UIColor) -> Mesh {
         let tip = Mesh.cone(radius:0.1, height:0.4, material: color)
-        let rod = Mesh.cylinder(radius: 0.05, height: length, material: color)
-        let mesh = rod.merge(tip.translated(by: Vector(0.0, length/2.0, 0.0) ))
+        let rod = Mesh.cylinder(radius: 0.05, height: length, material: color).translated(by: Vector(0, length/2, 0))
+        let mesh = rod.merge(tip.translated(by: Vector(0.0, length, 0.0) ))
         return mesh
     }
 
-    func refFrame(size: Double, alpha: Double)-> Mesh {
-        let axisX = arrow(length: size, color: UIColor(red: 1, green: 0, blue: 0, alpha: CGFloat(alpha))).rotZ(deg: 90)
-        let axisY = arrow(length: size, color: UIColor(red: 0, green: 1, blue: 0, alpha: CGFloat(alpha)))
-        let axisZ = arrow(length: size, color: UIColor(red: 0, green: 0, blue: 1, alpha: CGFloat(alpha))).rotX(deg: -90)
-        return axisX.merge(axisY.merge(axisZ))
-    }
-    
+       
+    //==========================================================================
     func refFrame(x: Double, y: Double, z: Double, alpha: Double) -> Mesh {
         var axisX : Mesh
         var axisY : Mesh
         var axisZ : Mesh
         
-        axisX = arrow(length: x, color: UIColor(red: 1, green: 0, blue: 0, alpha: CGFloat(alpha))).rotZ(deg: 90).translated(by: Vector(x/2, 0, 0))
-        if x < 0 {
-            axisX = axisX.rotZ(deg: 180.0)
+        if x >= 0 {
+            axisX = arrow(length: x, color: UIColor(red: 1, green: 0, blue: 0, alpha: CGFloat(alpha))).rotZ(deg: 90)
+        } else {
+            axisX = arrow(length: -x, color: UIColor(red: 1, green: 0, blue: 0, alpha: CGFloat(alpha))).rotZ(deg: -90)
         }
         
-        axisY = arrow(length: y, color: UIColor(red: 0, green: 1, blue: 0, alpha: CGFloat(alpha))).translated(by: Vector(0, y/2, 0))
-        if y < 0 {
-            axisY = axisY.rotX(deg: 180.0)
+        if y >= 0 {
+            axisY = arrow(length: y, color: UIColor(red: 0, green: 1, blue: 0, alpha: CGFloat(alpha)))
+        } else {
+            axisY = arrow(length: -y, color: UIColor(red: 0, green: 1, blue: 0, alpha: CGFloat(alpha))).rotZ(deg: 180.0)
         }
         
-        axisZ = arrow(length: z, color: UIColor(red: 0, green: 0, blue: 1, alpha: CGFloat(alpha))).rotX(deg: -90).translated(by: Vector(0, 0, z/2))
-        if z < 0 {
-            axisZ = axisZ.rotY(deg: 180.0)
+        if z >= 0 {
+            axisZ = arrow(length: z, color: UIColor(red: 0, green: 0, blue: 1, alpha: CGFloat(alpha))).rotX(deg: -90)
+        } else {
+            axisZ = arrow(length: -z, color: UIColor(red: 0, green: 0, blue: 1, alpha: CGFloat(alpha))).rotX(deg: 90)
         }
+        
         return axisX.merge(axisY.merge(axisZ))
     }
 }
 
 
-
+//==========================================================================
 // UIPickerViewDelegate, UIPickerViewDataSource extension
 extension ViewController : UIPickerViewDelegate, UIPickerViewDataSource {
+    
+    //==========================================================================
     // Number of columns of data
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
     }
     
+    //==========================================================================
     // The number of rows of data
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
         return pickerData.count
     }
     
+    //==========================================================================
     // The data to return fopr the row and component (column) that's being passed in
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return pickerData[row]
     }
     
+    //==========================================================================
     // Capture the picker view selection
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         graphIndex = row

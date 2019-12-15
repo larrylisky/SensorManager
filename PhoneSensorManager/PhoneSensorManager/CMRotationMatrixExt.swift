@@ -24,6 +24,13 @@ extension CMRotationMatrix {
         return Vector(x, y, z)
     }
     
+    static func *(left: Vector, right: CMRotationMatrix) -> Vector {
+        let x = left.x * right.m11 + left.y * right.m21 + left.z * right.m31
+        let y = left.x * right.m12 + left.y * right.m22 + left.z * right.m32
+        let z = left.x * right.m13 + left.y * right.m23 + left.z * right.m33
+        return Vector(x, y, z)
+     }
+    
     // Multiple two CMRotationMatrix
     static func *(left: CMRotationMatrix, right:CMRotationMatrix) -> CMRotationMatrix {
         return CMRotationMatrix(
