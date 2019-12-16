@@ -20,6 +20,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var graphPickView: UIPickerView!
     @IBOutlet weak var exportFileName: UITextField!
     @IBOutlet weak var recordButton: UIButton!
+    @IBOutlet weak var warning: UILabel!
     
     // Operating parameters
     let storage = StorageManager()
@@ -141,9 +142,9 @@ class ViewController: UIViewController {
         speed = sensor.data.speed*mph
         course = sensor.data.course
         
-    //  Test only
-        speed = 8.0
-        course = 180
+        // Comment in for debug
+        //speed = 8.0
+        //course = 20
         
         fastEnough = (course > 0 && speed >= 5.0)
          
@@ -163,7 +164,8 @@ class ViewController: UIViewController {
         if !sceneView.isHidden {
             updateScene()
         }
-        else if fastEnough {
+        else {
+            warning.isHidden = (recordButton.titleLabel?.text == "Stop")
             updateChartData()
         }
     }
@@ -172,7 +174,7 @@ class ViewController: UIViewController {
     //==========================================================================
     // Update Chart data
     func updateChartData() {
-            
+        
         // Create the data collection [ChartDataEntry]
         let buf = fifo.get()
         var xData : [ChartDataEntry] = []

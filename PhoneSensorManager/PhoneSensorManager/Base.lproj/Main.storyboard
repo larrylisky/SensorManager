@@ -10,7 +10,7 @@
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="PhoneSensorManager" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="DriveCheck" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -18,6 +18,12 @@
                             <view contentMode="scaleToFill" restorationIdentifier="line_chart_id" translatesAutoresizingMaskIntoConstraints="NO" id="Cja-ax-hpU" customClass="LineChartView" customModule="Charts">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="250"/>
                                 <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Tap &quot;Record&quot; and start driving" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ICR-Rv-vNA">
+                                        <rect key="frame" x="92" y="189" width="230" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
                                     <view contentMode="scaleToFill" restorationIdentifier="scene_view_id" translatesAutoresizingMaskIntoConstraints="NO" id="bK6-R6-YbZ" customClass="SCNView">
                                         <rect key="frame" x="0.0" y="0.0" width="414" height="250"/>
                                         <subviews>
@@ -70,6 +76,7 @@
                                     <constraint firstAttribute="height" constant="250" id="TdH-NX-tdH"/>
                                     <constraint firstAttribute="height" constant="250" id="Twm-ed-SGp"/>
                                     <constraint firstItem="bK6-R6-YbZ" firstAttribute="leading" secondItem="Cja-ax-hpU" secondAttribute="leading" id="VQl-8K-znv"/>
+                                    <constraint firstAttribute="bottom" secondItem="ICR-Rv-vNA" secondAttribute="bottom" constant="40" id="XDe-72-9LJ"/>
                                     <constraint firstItem="bK6-R6-YbZ" firstAttribute="top" secondItem="Cja-ax-hpU" secondAttribute="top" id="XTu-ep-0dN"/>
                                     <constraint firstItem="bK6-R6-YbZ" firstAttribute="top" secondItem="Cja-ax-hpU" secondAttribute="top" id="YHY-Yw-bTi"/>
                                     <constraint firstAttribute="trailing" secondItem="bK6-R6-YbZ" secondAttribute="trailing" id="ZxL-lP-WBJ"/>
@@ -91,6 +98,7 @@
                                     <constraint firstAttribute="bottom" secondItem="bK6-R6-YbZ" secondAttribute="bottom" id="ole-JJ-qCO"/>
                                     <constraint firstAttribute="trailing" secondItem="bK6-R6-YbZ" secondAttribute="trailing" id="rsJ-rh-J0A"/>
                                     <constraint firstItem="bK6-R6-YbZ" firstAttribute="leading" secondItem="Cja-ax-hpU" secondAttribute="leading" id="tVJ-zz-T6E"/>
+                                    <constraint firstItem="ICR-Rv-vNA" firstAttribute="centerX" secondItem="Cja-ax-hpU" secondAttribute="centerX" id="w0j-5h-OeI"/>
                                     <constraint firstItem="bK6-R6-YbZ" firstAttribute="leading" secondItem="Cja-ax-hpU" secondAttribute="leading" constant="30" id="ydE-9B-59l"/>
                                 </constraints>
                                 <variation key="default">
@@ -501,6 +509,7 @@
                         <outlet property="lineChartView" destination="Cja-ax-hpU" id="y0h-Yo-9oj"/>
                         <outlet property="recordButton" destination="dzZ-Qd-hs3" id="FvS-Li-dLt"/>
                         <outlet property="sceneView" destination="bK6-R6-YbZ" id="K8D-cc-NI1"/>
+                        <outlet property="warning" destination="ICR-Rv-vNA" id="Utb-zk-biY"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
