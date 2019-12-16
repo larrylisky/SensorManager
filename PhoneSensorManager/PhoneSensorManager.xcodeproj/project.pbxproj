@@ -39,7 +39,7 @@
 		4614FB3923A7048700BD2F8D /* Euclid.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Euclid.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4614FB3B23A7228200BD2F8D /* Spring.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Spring.swift; sourceTree = "<group>"; };
 		4614FB3D23A72AAD00BD2F8D /* StorageManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
-		469507EE23A14FBE0061F5E4 /* PhoneSensorManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhoneSensorManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		469507EE23A14FBE0061F5E4 /* DriveCheck.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DriveCheck.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		469507F123A14FBE0061F5E4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		469507F323A14FBE0061F5E4 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		469507F523A14FBE0061F5E4 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -104,7 +104,7 @@
 		469507EF23A14FBE0061F5E4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				469507EE23A14FBE0061F5E4 /* PhoneSensorManager.app */,
+				469507EE23A14FBE0061F5E4 /* DriveCheck.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -159,7 +159,7 @@
 			);
 			name = PhoneSensorManager;
 			productName = PhoneSensorManager;
-			productReference = 469507EE23A14FBE0061F5E4 /* PhoneSensorManager.app */;
+			productReference = 469507EE23A14FBE0061F5E4 /* DriveCheck.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -421,7 +421,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "ai.e-motion.PhoneSensorManager";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = DriveCheck;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -440,7 +440,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "ai.e-motion.PhoneSensorManager";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = DriveCheck;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

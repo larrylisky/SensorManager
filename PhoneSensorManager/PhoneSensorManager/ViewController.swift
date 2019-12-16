@@ -21,7 +21,7 @@ class ViewController: UIViewController {
     @IBOutlet weak var exportFileName: UITextField!
     @IBOutlet weak var recordButton: UIButton!
     
-    // Storage manager
+    // Operating parameters
     let storage = StorageManager()
     
     // Line chart related params
@@ -115,7 +115,7 @@ class ViewController: UIViewController {
     //==========================================================================
     @IBAction func onExportPressed(_ sender: Any) {
         if let filename = exportFileName.text {
-            exportData(fileName: filename)
+            exportData(fileName: filename+".csv")
             exportFileName.resignFirstResponder()
         }
     }
@@ -147,12 +147,18 @@ class ViewController: UIViewController {
         
         fastEnough = (course > 0 && speed >= 5.0)
          
-        
         if fastEnough {
             phoneAccelVector = Vector(sensor.data.accelX, sensor.data.accelY, sensor.data.accelZ)
             carAccelVector = phoneAccelVector * RotationPC
+        }
+        else {
+            carAccelVector = Vector(0,0,0)
+        }
+            
+        if recordButton.titleLabel?.text == "Stop" {
             fifo.push((carAccelVector.x, carAccelVector.y, carAccelVector.z, speed))
         }
+
         
         if !sceneView.isHidden {
             updateScene()
@@ -448,7 +454,6 @@ extension ViewController {
     
     //==========================================================================
     func updateTransforms() {
-
         RotationPG = sensor.rotationMatrix
         if fastEnough {
             let theta = -course / 180.0 * Double.pi
@@ -466,7 +471,6 @@ extension ViewController {
     
     //==========================================================================
     func updateScene() {
-        
         SCNTransaction.begin()
         drawEarthRefFrame(r: RotationPG)
         drawCarRefFrame(r: RotationPC)
