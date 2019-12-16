@@ -11,7 +11,7 @@ import Foundation
 // Fifo is a circular buffer of Doubles
 // Head is the index of beginning of buffer (oldest value)
 // Tail is the index of end of buffer (newest value)
-// pop() from head, push() to tail
+// pull() from head, push() to tail, pop() from tail
 class Fifo<T> {
     var data : [T]
     var head : Int
@@ -70,7 +70,7 @@ class Fifo<T> {
     }
     
     //===================================================
-    func pop() -> T {
+    func pull() -> T {
         var retVal : T
         
         if isEmpty() {
@@ -89,6 +89,7 @@ class Fifo<T> {
         }
     }
     
+    
     //===================================================
     func isEmpty() -> Bool {
         return count == 0
@@ -100,7 +101,7 @@ class Fifo<T> {
         let cp = Fifo<T>(max, invalid: inv)
         cp.copy(self)
         while !cp.isEmpty() {
-            out.append(cp.pop())
+            out.append(cp.pull())
         }
         return out
     }
@@ -122,7 +123,7 @@ class Fifo<T> {
                 print("Empty")
             }
             else {
-                print("pop \(fifo.pop())")
+                print("pull \(fifo.pull())")
                 fifo.dump()
             }
         }

@@ -14,6 +14,8 @@
 		4614FB3423A4968C00BD2F8D /* Fifo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4614FB3323A4968C00BD2F8D /* Fifo.swift */; };
 		4614FB3823A7048700BD2F8D /* Charts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4614FB3723A7048700BD2F8D /* Charts.framework */; };
 		4614FB3A23A7048700BD2F8D /* Euclid.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4614FB3923A7048700BD2F8D /* Euclid.framework */; };
+		4614FB3C23A7228200BD2F8D /* Spring.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4614FB3B23A7228200BD2F8D /* Spring.swift */; };
+		4614FB3E23A72AAD00BD2F8D /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4614FB3D23A72AAD00BD2F8D /* StorageManager.swift */; };
 		469507F223A14FBE0061F5E4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469507F123A14FBE0061F5E4 /* AppDelegate.swift */; };
 		469507F423A14FBE0061F5E4 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469507F323A14FBE0061F5E4 /* SceneDelegate.swift */; };
 		469507F623A14FBE0061F5E4 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469507F523A14FBE0061F5E4 /* ViewController.swift */; };
@@ -35,6 +37,8 @@
 		4614FB3323A4968C00BD2F8D /* Fifo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fifo.swift; sourceTree = "<group>"; };
 		4614FB3723A7048700BD2F8D /* Charts.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Charts.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4614FB3923A7048700BD2F8D /* Euclid.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Euclid.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		4614FB3B23A7228200BD2F8D /* Spring.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Spring.swift; sourceTree = "<group>"; };
+		4614FB3D23A72AAD00BD2F8D /* StorageManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
 		469507EE23A14FBE0061F5E4 /* PhoneSensorManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PhoneSensorManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		469507F123A14FBE0061F5E4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		469507F323A14FBE0061F5E4 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -120,6 +124,8 @@
 				469507FA23A14FBE0061F5E4 /* PhoneSensorManager.xcdatamodeld */,
 				4695082423A1B5170061F5E4 /* MeshObjects.swift */,
 				4614FB3323A4968C00BD2F8D /* Fifo.swift */,
+				4614FB3B23A7228200BD2F8D /* Spring.swift */,
+				4614FB3D23A72AAD00BD2F8D /* StorageManager.swift */,
 			);
 			path = PhoneSensorManager;
 			sourceTree = "<group>";
@@ -252,8 +258,10 @@
 				469507F623A14FBE0061F5E4 /* ViewController.swift in Sources */,
 				469507F223A14FBE0061F5E4 /* AppDelegate.swift in Sources */,
 				469508C123A1ECD60061F5E4 /* SensorManager.swift in Sources */,
+				4614FB3E23A72AAD00BD2F8D /* StorageManager.swift in Sources */,
 				4614FB3123A3D88D00BD2F8D /* DateValueFormatter.swift in Sources */,
 				4614FB3223A3D88D00BD2F8D /* LargeValueFormatter.swift in Sources */,
+				4614FB3C23A7228200BD2F8D /* Spring.swift in Sources */,
 				4614FB3423A4968C00BD2F8D /* Fifo.swift in Sources */,
 				4614FB2F23A3D88D00BD2F8D /* IntAxisValueFormatter.swift in Sources */,
 				469507FC23A14FBE0061F5E4 /* PhoneSensorManager.xcdatamodeld in Sources */,

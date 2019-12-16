@@ -21,12 +21,16 @@ class ViewController: UIViewController {
     @IBOutlet weak var exportFileName: UITextField!
     @IBOutlet weak var recordButton: UIButton!
     
+    // Storage manager
+    let storage = StorageManager()
+    
     // Line chart related params
     var fastEnough : Bool!
     var speed : Double!
     var course : Double!
     let mph = Double(1/0.44704)
-    let dataSize : Int = 100
+    let dataSize : Int = 1000
+    let dataInterval : Double = 0.1  // sec
     var fifo : Fifo<(Double, Double, Double, Double)>!
             
     // Reference frames display params
@@ -59,15 +63,26 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Tap right above the keyboard will cause it to disappear
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture))
+        self.view.addGestureRecognizer(tapGestureRecognizer)
+        
+        // Init operating parameters
         carAccelVector = Vector(0,0,0)
         phoneAccelVector = Vector(0,0,0)
         fifo = Fifo<(Double, Double, Double, Double)>(dataSize, invalid: (0,0,0,0))
+        for _ in 0..<dataSize {
+            fifo.push((0,0,0,0))
+        }
         fastEnough = false
         speed = 0
         course = -1
         
         recordButton.setTitle("Record", for: .normal)
         defaultColor = recordButton.titleColor(for: .normal)
+        
+        // Export file name delegate
+        exportFileName.delegate = self
         
         // Set up graph picker
         graphPickView.delegate = self
@@ -80,18 +95,29 @@ class ViewController: UIViewController {
         setupLineChartView(-1, 1)
         
         // Setup periodic timer task
-        _ = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(periodic), userInfo: nil, repeats: true)
+        _ = Timer.scheduledTimer(timeInterval: dataInterval, target: self, selector: #selector(periodic), userInfo: nil, repeats: true)
     }
     
+    //=======================================================================
+    @objc private func handleTapGesture(sender: UITapGestureRecognizer) {
+        exportFileName.endEditing(true)
+    }
     
     //==========================================================================
     @IBAction func onClearPressed(_ sender: Any) {
         fifo.clear()
+        for _ in 0..<dataSize {
+            fifo.push((0,0,0,0))
+        }
     }
 
 
     //==========================================================================
     @IBAction func onExportPressed(_ sender: Any) {
+        if let filename = exportFileName.text {
+            exportData(fileName: filename)
+            exportFileName.resignFirstResponder()
+        }
     }
 
     
@@ -116,8 +142,8 @@ class ViewController: UIViewController {
         course = sensor.data.course
         
     //  Test only
-    //    speed = 8.0
-    //    course = 180
+        speed = 8.0
+        course = 180
         
         fastEnough = (course > 0 && speed >= 5.0)
          
@@ -221,12 +247,6 @@ class ViewController: UIViewController {
         }
     }
 
-}
-
-
-//==========================================================================
-// ViewController LineChartView support functions
-extension ViewController {
     
     //==========================================================================
     func setupLineChartView(_ min: Double, _ max: Double) {
@@ -263,6 +283,53 @@ extension ViewController {
 
         lineChartView.rightAxis.enabled = false
         lineChartView.legend.form = .line
+    }
+
+    
+    //==========================================================================
+    func exportData(fileName: String) {
+        
+        // Make sure old file of same name is overwritten
+        if let path = storage.createFile(name: fileName) {
+            _ = storage.removeItem(at: path)
+        }
+        let path = storage.createFile(name: fileName)
+        
+        // Write the data
+        let data = fifo.get()
+        _ = storage.writeFile(fileURL: path, text: "Time(s), AccelX, AccelY, AccelZ, Speed\n")
+        for i in 0..<data.count {
+            let (ax, ay, az, speed) = data[i]
+            _ = storage.writeFile(fileURL: path, text: "\(Double(i)*dataInterval) \(ax), \(ay), \(az), \(speed)\n")
+        }
+    }
+    
+    
+    //=======================================================================
+    func showAlert(title: String, message: String, prompt: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let action = UIAlertAction(title: prompt, style: .default, handler: nil)
+        alertController.addAction(action)
+        present(alertController, animated: true, completion:  nil)
+     }
+    
+    //==========================================================
+    func showActionSheet(title: String, message: String, actions: [UIAlertAction]) {
+        let actionSheet = UIAlertController(title: title, message: message, preferredStyle: .actionSheet)
+        actions.forEach(actionSheet.addAction(_:))
+        present(actionSheet, animated: true, completion: nil)
+    }
+   
+}
+
+
+//==========================================================================
+// ChartViewDelegate
+extension ViewController : UITextFieldDelegate {
+    
+    // Enter key will cause the keyboard to disappear
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.endEditing(true)
     }
 }
 
@@ -486,3 +553,4 @@ extension ViewController : UIPickerViewDelegate, UIPickerViewDataSource {
         }
     }
 }
+
