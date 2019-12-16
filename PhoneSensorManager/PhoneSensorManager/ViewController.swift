@@ -7,11 +7,10 @@
 //
 //
 import UIKit
-import Charts
 import SceneKit
 import Euclid
 import CoreMotion
-import Foundation
+import Charts
 
 //==========================================================================
 class ViewController: UIViewController {
@@ -23,6 +22,10 @@ class ViewController: UIViewController {
     @IBOutlet weak var recordButton: UIButton!
     
     // Line chart related params
+    var fastEnough : Bool!
+    var speed : Double!
+    var course : Double!
+    let mph = Double(1/0.44704)
     let dataSize : Int = 100
     var fifo : Fifo<(Double, Double, Double, Double)>!
             
@@ -59,6 +62,9 @@ class ViewController: UIViewController {
         carAccelVector = Vector(0,0,0)
         phoneAccelVector = Vector(0,0,0)
         fifo = Fifo<(Double, Double, Double, Double)>(dataSize, invalid: (0,0,0,0))
+        fastEnough = false
+        speed = 0
+        course = -1
         
         recordButton.setTitle("Record", for: .normal)
         defaultColor = recordButton.titleColor(for: .normal)
@@ -104,18 +110,28 @@ class ViewController: UIViewController {
     //==========================================================================
     // Periodic function
     @objc func periodic() {
-        let mph = Double(1/0.44704)
-        
+       
         updateTransforms()
-        phoneAccelVector = Vector(sensor.data.accelX, sensor.data.accelY, sensor.data.accelZ)
-       // carAccelVector = RotationPC * phoneAccelVector
-        carAccelVector = phoneAccelVector * RotationPC
-        fifo.push((carAccelVector.x, carAccelVector.y, carAccelVector.z, sensor.data.speed*mph))
-
+        speed = sensor.data.speed*mph
+        course = sensor.data.course
+        
+    //  Test only
+    //    speed = 8.0
+    //    course = 180
+        
+        fastEnough = (course > 0 && speed >= 5.0)
+         
+        
+        if fastEnough {
+            phoneAccelVector = Vector(sensor.data.accelX, sensor.data.accelY, sensor.data.accelZ)
+            carAccelVector = phoneAccelVector * RotationPC
+            fifo.push((carAccelVector.x, carAccelVector.y, carAccelVector.z, speed))
+        }
+        
         if !sceneView.isHidden {
             updateScene()
         }
-        else {
+        else if fastEnough {
             updateChartData()
         }
     }
@@ -318,14 +334,6 @@ extension ViewController {
         sceneView.scene = scene
     }
     
-    //==========================================================================
-    // Update car reference frame
-    func updateCarRefFrame(x: Double, y: Double, z: Double) {
-        carRefFrame = refFrame(x: x, y: y, z: z, alpha: 1.0)
-        let newNode = makeNode(carRefFrame)
-        scene.rootNode.replaceChildNode(carRefFrameNode, with: newNode)
-        carRefFrameNode = newNode
-    }
     
     //==========================================================================
     // Make node from mesh
@@ -373,14 +381,9 @@ extension ViewController {
     
     //==========================================================================
     func updateTransforms() {
-        let speed = sensor.data.speed
-        let course = sensor.data.course
-        //let course = 90.0
-        //let speed = 3.0
-        
+
         RotationPG = sensor.rotationMatrix
-        
-        if course >= 0 && speed > 2.2452 {
+        if fastEnough {
             let theta = -course / 180.0 * Double.pi
             let c = cos(theta)
             let s = sin(theta)
@@ -398,9 +401,9 @@ extension ViewController {
     func updateScene() {
         
         SCNTransaction.begin()
-       // updateCarRefFrame(x: 2, y: 2, z: 2)    // TODO: buggy
-        drawCarRefFrame(r: RotationPC)
         drawEarthRefFrame(r: RotationPG)
+        drawCarRefFrame(r: RotationPC)
+        carRefFrameNode.isHidden = !fastEnough
         SCNTransaction.commit()
     }
     
