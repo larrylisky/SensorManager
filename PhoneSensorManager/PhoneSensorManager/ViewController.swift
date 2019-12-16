@@ -154,6 +154,7 @@ class ViewController: UIViewController {
         }
         else {
             carAccelVector = Vector(0,0,0)
+            speed = 0
         }
             
         if recordButton.titleLabel?.text == "Stop" {
