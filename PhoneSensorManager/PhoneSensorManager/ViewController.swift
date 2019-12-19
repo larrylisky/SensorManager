@@ -32,7 +32,7 @@ class ViewController: UIViewController {
     let mph = Double(1/0.44704)
     let dataSize : Int = 1000
     let dataInterval : Double = 0.1  // sec
-    var fifo : Fifo<(Double, Double, Double, Double)>!
+    var fifo : Fifo<(Double, Double, Double, Double, Double)>!
             
     // Reference frames display params
     var scene = SCNScene()
@@ -58,7 +58,8 @@ class ViewController: UIViewController {
     var pickerData = [
         "Reference frames",
         "Acceleration",
-        "Speed"]
+        "Speed",
+        "Course"]
     
     //==========================================================================
     override func viewDidLoad() {
@@ -71,14 +72,14 @@ class ViewController: UIViewController {
         // Init operating parameters
         carAccelVector = Vector(0,0,0)
         phoneAccelVector = Vector(0,0,0)
-        fifo = Fifo<(Double, Double, Double, Double)>(dataSize, invalid: (0,0,0,0))
+        fifo = Fifo<(Double, Double, Double, Double, Double)>(dataSize, invalid: (0,0,0,0,0))
         for _ in 0..<dataSize {
-            fifo.push((0,0,0,0))
+            fifo.push((0,0,0,0,0))
         }
         fastEnough = false
         speed = 0
         course = -1
-        
+                
         recordButton.setTitle("Record", for: .normal)
         defaultColor = recordButton.titleColor(for: .normal)
         
@@ -108,7 +109,7 @@ class ViewController: UIViewController {
     @IBAction func onClearPressed(_ sender: Any) {
         fifo.clear()
         for _ in 0..<dataSize {
-            fifo.push((0,0,0,0))
+            fifo.push((0,0,0,0,0))
         }
     }
 
@@ -146,7 +147,7 @@ class ViewController: UIViewController {
         //speed = 8.0
         //course = 20
         
-        fastEnough = (course > 0 && speed >= 5.0)
+        fastEnough = (course >= 0.0 && speed >= 5.0)
          
         if fastEnough {
             phoneAccelVector = Vector(sensor.data.accelX, sensor.data.accelY, sensor.data.accelZ)
@@ -155,10 +156,11 @@ class ViewController: UIViewController {
         else {
             carAccelVector = Vector(0,0,0)
             speed = 0
+            course = -1
         }
             
         if recordButton.titleLabel?.text == "Stop" {
-            fifo.push((carAccelVector.x, carAccelVector.y, carAccelVector.z, speed))
+            fifo.push((carAccelVector.x, carAccelVector.y, carAccelVector.z, speed, course))
         }
 
         
@@ -182,16 +184,19 @@ class ViewController: UIViewController {
         var yData: [ChartDataEntry] = []
         var zData : [ChartDataEntry] = []
         var spData : [ChartDataEntry] = []
+        var csData : [ChartDataEntry] = []
         for i in 0..<buf.count {
             let x = Double(i)
             let yx = buf[i].0
             let yy = buf[i].1
             let yz = buf[i].2
             let sp = buf[i].3
+            let cs = buf[i].4
             xData.append(ChartDataEntry(x: x, y: Double(yx)))
             yData.append(ChartDataEntry(x: x, y: Double(yy)))
             zData.append(ChartDataEntry(x: x, y: Double(yz)))
             spData.append(ChartDataEntry(x:x, y: Double(sp)))
+            csData.append(ChartDataEntry(x:x, y: Double(cs)))
         }
         
         if graphIndex == 1 {
@@ -254,6 +259,25 @@ class ViewController: UIViewController {
             data.setValueFont(.systemFont(ofSize: 9, weight: .light))
             lineChartView.data = data
         }
+        else if graphIndex == 3 {  // course
+            // Setup the data set object
+            let csSet = LineChartDataSet(entries: csData, label: "COURSE")
+            csSet.axisDependency = .left
+            csSet.setColor(UIColor.blue)
+            csSet.lineWidth = 1.5
+            csSet.drawCirclesEnabled = false
+            csSet.drawValuesEnabled = false
+            csSet.fillAlpha = 0.26
+            csSet.fillColor = UIColor(red: 51/255, green: 181/255, blue: 229/255, alpha: 1)
+            csSet.highlightColor = UIColor(red: 244/255, green: 117/255, blue: 117/255, alpha: 1)
+            csSet.drawCircleHoleEnabled = false
+            
+            // Setup the LineChartData
+            let data = LineChartData(dataSet: csSet)
+            data.setValueTextColor(.white)
+            data.setValueFont(.systemFont(ofSize: 9, weight: .light))
+            lineChartView.data = data
+        }
     }
 
     
@@ -306,10 +330,10 @@ class ViewController: UIViewController {
         
         // Write the data
         let data = fifo.get()
-        _ = storage.writeFile(fileURL: path, text: "Time(s), AccelX, AccelY, AccelZ, Speed\n")
+        _ = storage.writeFile(fileURL: path, text: "Time(s), AccelX, AccelY, AccelZ, Speed, Course\n")
         for i in 0..<data.count {
-            let (ax, ay, az, speed) = data[i]
-            _ = storage.writeFile(fileURL: path, text: "\(Double(i)*dataInterval) \(ax), \(ay), \(az), \(speed)\n")
+            let (ax, ay, az, sp, cs) = data[i]
+            _ = storage.writeFile(fileURL: path, text: "\(Double(i)*dataInterval) \(ax), \(ay), \(az), \(sp), \(cs)\n")
         }
     }
     
@@ -441,6 +465,9 @@ extension ViewController {
             let qz = (r.m21 - r.m12) / (4*qw)
             earthRefFrameNode.orientation = SCNQuaternion(qx, qy, qz, qw)
         }
+        else {
+            print("drawEarthRefFrame has negative arg")
+        }
     }
 
     //==========================================================================
@@ -452,6 +479,9 @@ extension ViewController {
             let qy = (r.m13 - r.m31) / (4*qw)
             let qz = (r.m21 - r.m12) / (4*qw)
             carRefFrameNode.orientation = SCNQuaternion(qx, qy, qz, qw)
+        }
+        else {
+            print("drawCarRefFrame has negative arg")
         }
     }
     
@@ -495,24 +525,20 @@ extension ViewController {
         var axisX : Mesh
         var axisY : Mesh
         var axisZ : Mesh
+        var rotAngle : Double = 0.0
         
-        if x >= 0 {
-            axisX = arrow(length: x, color: UIColor(red: 1, green: 0, blue: 0, alpha: CGFloat(alpha))).rotZ(deg: 90)
-        } else {
-            axisX = arrow(length: -x, color: UIColor(red: 1, green: 0, blue: 0, alpha: CGFloat(alpha))).rotZ(deg: -90)
-        }
+        let ax = abs(x)
+        let ay = abs(y)
+        let az = abs(z)
         
-        if y >= 0 {
-            axisY = arrow(length: y, color: UIColor(red: 0, green: 1, blue: 0, alpha: CGFloat(alpha)))
-        } else {
-            axisY = arrow(length: -y, color: UIColor(red: 0, green: 1, blue: 0, alpha: CGFloat(alpha))).rotZ(deg: 180.0)
-        }
+        rotAngle = (x >= 0) ? 90 : -90
+        axisX = arrow(length: ax, color: UIColor(red: 1, green: 0, blue: 0, alpha: CGFloat(alpha))).rotZ(deg: rotAngle)
         
-        if z >= 0 {
-            axisZ = arrow(length: z, color: UIColor(red: 0, green: 0, blue: 1, alpha: CGFloat(alpha))).rotX(deg: -90)
-        } else {
-            axisZ = arrow(length: -z, color: UIColor(red: 0, green: 0, blue: 1, alpha: CGFloat(alpha))).rotX(deg: 90)
-        }
+        rotAngle = (y >= 0) ? 0 : 180
+        axisY = arrow(length: ay, color: UIColor(red: 0, green: 1, blue: 0, alpha: CGFloat(alpha))).rotZ(deg: rotAngle)
+        
+        rotAngle = (z >= 0) ? -90 : 90
+        axisZ = arrow(length: az, color: UIColor(red: 0, green: 0, blue: 1, alpha: CGFloat(alpha))).rotX(deg: rotAngle)
         
         return axisX.merge(axisY.merge(axisZ))
     }
@@ -553,8 +579,11 @@ extension ViewController : UIPickerViewDelegate, UIPickerViewDataSource {
             setupLineChartView(-1, 1)
             title = "Accelerations"
         case 2:
-            setupLineChartView(0, 100)  // 0-100 mph
+            setupLineChartView(-5, 100)  // 0-100 mph
             title = "Speed"
+        case 3:
+            setupLineChartView(-10, 360)  // degree
+            title = "Course"
         default:
             break
         }
